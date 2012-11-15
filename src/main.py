@@ -162,9 +162,9 @@ def display( ):
    #           0.0,0.0,0.0,
    #           0.0,0.0,1.0 )
    
-   gluLookAt(eyeX,eyeY,eyeZ,25,25,25,upX, upY, upZ);
-
-   glRotate( theta*15.0, 0.0,0.0,1.0 )
+   gluLookAt(eyeX, eyeY, eyeZ, 0, 0, 0, upX, upY, upZ);
+   
+   #glRotate( theta*15.0, 0.0,0.0,1.0 )
    #glTranslatef( 25.0,25.0,0 )
    
    #glEnable( GL_BLEND )
@@ -183,9 +183,12 @@ eyeX=eyeY=eyeZ=upX=upY=upZ=0
 def onMouseMove(x, y):
     global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
     # Mouse point to angle conversion
-    cam_theta = (360.0/winHeight)*y*3.0    #3.0 rotations possible
-    cam_phi = (360.0/winWidth)*x*3.0
-
+    
+    #cam_theta = (360.0/winHeight)*y*3.0#3.0 rotations possible
+    #cam_phi = (360.0/winWidth)*x*3.0
+    cam_phi = 360.0*(x-winWidth/2)/winWidth*2.0
+    cam_theta = 360.0*(y-winHeight/2)/winHeight*2.0 + 90.0
+    
     # Restrict the angles within 0~360 deg (optional)
     if cam_theta > 360:
         cam_theta = fmod(cam_theta,360.0)
@@ -197,9 +200,9 @@ def onMouseMove(x, y):
     eyeX = cam_r * sin(cam_theta*0.0174532) * sin(cam_phi*0.0174532)
     eyeY = cam_r * cos(cam_theta*0.0174532)
     eyeZ = cam_r * sin(cam_theta*0.0174532) * cos(cam_phi*0.0174532)
-
+    
     # Reduce theta slightly to obtain another point on the same longitude line on the sphere.
-    dt=1.0
+    dt=0.1
     eyeXtemp = cam_r * sin(cam_theta*0.0174532-dt) * sin(cam_phi*0.0174532)
     eyeYtemp = cam_r * cos(cam_theta*0.0174532-dt)
     eyeZtemp = cam_r * sin(cam_theta*0.0174532-dt) * cos(cam_phi*0.0174532)
@@ -208,7 +211,7 @@ def onMouseMove(x, y):
     upX=eyeXtemp-eyeX
     upY=eyeYtemp-eyeY
     upZ=eyeZtemp-eyeZ
-
+    
     glutPostRedisplay()
 
 winHeight=720
@@ -227,10 +230,9 @@ def init():
     glutIdleFunc( my_idle )
     glEnable( GL_DEPTH_TEST )
     glClearColor( 1,1,1,0 )
-
+    
     define_shader()
-
-
+    
     global POINTS
     global COLORS
     global STATE
@@ -242,9 +244,11 @@ def init():
         for j in range(cube_length):
             for k in range(cube_length):
                 #POINTS[i*cube_length**2+j*cube_length+k] = [i+i*j,j+j*k,k+k*i]
-                POINTS[i*cube_length**2+j*cube_length+k] = [i,j,k]
+                POINTS[i*cube_length**2+j*cube_length+k] = [i-cube_length/2,j-cube_length/2,k-cube_length/2]
                 COLORS[i*cube_length**2+j*cube_length+k] = [i*1.0/cube_length,j*1.0/cube_length,k*1.0/cube_length]
-     
+    
+    onMouseMove(winWidth/2,winHeight/2)
+    
     glutMainLoop();
 
 init()
