@@ -65,21 +65,21 @@ varying out vec2 coord;
 
 void main() 
 {
-  gl_FrontColor = gl_FrontColorIn[0];
+    gl_FrontColor = gl_FrontColorIn[0];
 
-  coord = vec2( -1,-1 );
-  gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4(-radius,-radius,0,0) );
-  EmitVertex();
-  coord = vec2( -1,1 );
-  gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4(-radius,radius, 0,0) );
-  EmitVertex();
-  coord = vec2( 1,-1 );
-  gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4( radius,-radius, 0,0) );
-  EmitVertex();
-  coord = vec2( 1,1 );
-  gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4( radius,radius, 0,0) );
-  EmitVertex();  
-  EndPrimitive();
+    coord = vec2( -1,-1 );
+    gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4(-radius,-radius,0,0) );
+    EmitVertex();
+    coord = vec2( -1,1 );
+    gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4(-radius,radius, 0,0) );
+    EmitVertex();
+    coord = vec2( 1,-1 );
+    gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4( radius,-radius, 0,0) );
+    EmitVertex();
+    coord = vec2( 1,1 );
+    gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4( radius,radius, 0,0) );
+    EmitVertex();  
+    EndPrimitive();
 }
 '''
 frag = '''
@@ -218,7 +218,7 @@ def onKeyPress(key, x, y):
     if key == chr(27):
         sys.exit()
     if key == 'z':
-        cam_r -= 10
+        cam_r = max(0,cam_r-10)
     if key == 'Z':
         cam_r += 10
     newValues = lookInSphere(cam_r,cam_phi,cam_theta)
@@ -276,7 +276,7 @@ def init():
     global STATE
     COLORS = numpy.ones( cube_length**3*3 ).reshape( (-1,3) )
     POINTS = numpy.ones( cube_length**3*3 ).reshape( (-1,3) )
-    STATE  = numpy.ones( cube_length**3*3 ).reshape( (-1,3) )  
+    STATE  = 2*numpy.ones( cube_length**3*3 ).reshape( (-1,3) )  
 
     for i in range(cube_length):
         for j in range(cube_length):
@@ -284,7 +284,9 @@ def init():
                 #POINTS[i*cube_length**2+j*cube_length+k] = [i+i*j,j+j*k,k+k*i]
                 POINTS[i*cube_length**2+j*cube_length+k] = [i+0.5-cube_length/2,j+0.5-cube_length/2,k+0.5-cube_length/2]
                 COLORS[i*cube_length**2+j*cube_length+k] = [i*1.0/cube_length,j*1.0/cube_length,k*1.0/cube_length]
-                
+                if i == 0 or j == 0 or k == 0 or i == cube_length-1 or j == cube_length-1 or k == cube_length-1:
+                    STATE[i*cube_length**2+j*cube_length+k] = 1#set as external point, internal are 2, removed are 0
+                    
     global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
     newValues = lookInSphere(cam_r,cam_phi,cam_theta)
     eyeX = newValues[0]
