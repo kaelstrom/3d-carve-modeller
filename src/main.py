@@ -7,6 +7,7 @@ import time
 import numpy
 import math
 from math import fmod, sin, cos
+from camera_functions import lookInSphere
 
 #These three defines exist in OpenGL.GL, but does not correspond to those used here
 GL_GEOMETRY_SHADER_EXT       = 0x8DD9
@@ -205,23 +206,14 @@ def onMouseMove(x, y):
         cam_theta = fmod(cam_theta,360.0)
     if cam_phi > 360:
         cam_phi = fmod(cam_phi,360.0)
-
-    # Spherical to Cartesian conversion.   
-    # Degrees to radians conversion factor 0.0174532
-    eyeX = cam_r * sin(cam_theta*0.0174532) * sin(cam_phi*0.0174532)
-    eyeY = cam_r * cos(cam_theta*0.0174532)
-    eyeZ = cam_r * sin(cam_theta*0.0174532) * cos(cam_phi*0.0174532)
     
-    # Reduce theta slightly to obtain another point on the same longitude line on the sphere.
-    dt=0.1
-    eyeXtemp = cam_r * sin(cam_theta*0.0174532-dt) * sin(cam_phi*0.0174532)
-    eyeYtemp = cam_r * cos(cam_theta*0.0174532-dt)
-    eyeZtemp = cam_r * sin(cam_theta*0.0174532-dt) * cos(cam_phi*0.0174532)
-
-    # Connect these two points to obtain the camera's up vector.
-    upX=eyeXtemp-eyeX
-    upY=eyeYtemp-eyeY
-    upZ=eyeZtemp-eyeZ
+    newValues = lookInSphere(cam_r,cam_phi,cam_theta)
+    eyeX = newValues[0]
+    eyeY = newValues[1]
+    eyeZ = newValues[2]
+    upX = newValues[3]
+    upY = newValues[4]
+    upZ = newValues[5]
     
     glutPostRedisplay()
 
@@ -232,7 +224,7 @@ def init():
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE )
     glutInitWindowSize(winWidth, winHeight)
-    # Open a window
+    #Open a window
     glutCreateWindow("Glut test window")
     
     glutReshapeFunc( reshape )
@@ -259,10 +251,14 @@ def init():
                 POINTS[i*cube_length**2+j*cube_length+k] = [i+0.5-cube_length/2,j+0.5-cube_length/2,k+0.5-cube_length/2]
                 COLORS[i*cube_length**2+j*cube_length+k] = [i*1.0/cube_length,j*1.0/cube_length,k*1.0/cube_length]
                 
-    global mouseDrag
-    mouseDrag = 1
-    onMouseMove(0,0)
-    mouseDrag = 0
+    global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
+    newValues = lookInSphere(cam_r,cam_phi,cam_theta)
+    eyeX = newValues[0]
+    eyeY = newValues[1]
+    eyeZ = newValues[2]
+    upX = newValues[3]
+    upY = newValues[4]
+    upZ = newValues[5]
     glutMainLoop();
 
 init()
