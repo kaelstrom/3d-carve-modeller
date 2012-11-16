@@ -9,6 +9,9 @@ import math
 from math import fmod, sin, cos
 from camera_functions import lookInSphere
 
+winWidth=1280
+winHeight=720
+
 #These three defines exist in OpenGL.GL, but does not correspond to those used here
 GL_GEOMETRY_SHADER_EXT       = 0x8DD9
 GL_GEOMETRY_INPUT_TYPE_EXT   = 0x8DDB
@@ -189,7 +192,7 @@ def onMousePress(button, state, x, y):
 eyeX=eyeY=eyeZ=upX=upY=upZ=0
 cam_phi=0
 cam_theta=90
-cam_r=150
+cam_r=100
 def onMouseMove(x, y):
     global mouseDrag,mouseDragX,mouseDragY
     global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
@@ -201,12 +204,11 @@ def onMouseMove(x, y):
     cam_theta += 360.0*(mouseDragY - y)/winHeight*2.0
     mouseDragX = x
     mouseDragY = y
-    # Restrict the angles within 0~360 deg (optional)
+    #Restrict the angles within 0~360 deg (optional)
     if cam_theta > 360:
         cam_theta = fmod(cam_theta,360.0)
     if cam_phi > 360:
         cam_phi = fmod(cam_phi,360.0)
-    
     newValues = lookInSphere(cam_r,cam_phi,cam_theta)
     eyeX = newValues[0]
     eyeY = newValues[1]
@@ -216,10 +218,30 @@ def onMouseMove(x, y):
     upZ = newValues[5]
     
     glutPostRedisplay()
-
-winHeight=720
-winWidth=1280
-
+    
+def onKeySpecialPress(key, x, y):
+    global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
+    if key == GLUT_KEY_LEFT:
+        cam_phi = (math.floor(cam_phi/45.0)+1.0)*45.0
+    if key == GLUT_KEY_RIGHT:
+        cam_phi = (math.ceil(cam_phi/45.0)-1.0)*45.0
+    if key == GLUT_KEY_UP:
+        cam_theta = (math.floor(cam_theta/45.0)+1.0)*45.0
+    if key == GLUT_KEY_DOWN:
+        cam_theta = (math.ceil(cam_theta/45.0)-1.0)*45.0
+    #Restrict the angles within 0~360 deg (optional)
+    if cam_theta > 360:
+        cam_theta = fmod(cam_theta,360.0)
+    if cam_phi > 360:
+        cam_phi = fmod(cam_phi,360.0)
+    newValues = lookInSphere(cam_r,cam_phi,cam_theta)
+    eyeX = newValues[0]
+    eyeY = newValues[1]
+    eyeZ = newValues[2]
+    upX = newValues[3]
+    upY = newValues[4]
+    upZ = newValues[5]
+    
 def init():
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE )
@@ -231,6 +253,7 @@ def init():
     glutDisplayFunc( display )
     glutMouseFunc( onMousePress )
     glutMotionFunc( onMouseMove )
+    glutSpecialFunc( onKeySpecialPress )
     glutIdleFunc( my_idle )
     glEnable( GL_DEPTH_TEST )
     glClearColor( 1,1,1,0 )

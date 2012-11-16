@@ -1,5 +1,4 @@
-camera controls work (scaling bugginess, low priority)
-	-buttons for perspective snapping
+camera distance control with scroll wheel?
 
 tools-
 	-draw 2D plane to define the negative space to slice
