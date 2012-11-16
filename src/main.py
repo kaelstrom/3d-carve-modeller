@@ -2,10 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from OpenGL import GL as gl
-import random
-import time
-import numpy
-import math
+import sys, numpy, time, random, math
 from math import fmod, sin, cos
 from camera_functions import lookInSphere
 
@@ -147,11 +144,11 @@ def define_shader():
 
 
 def reshape( width, height ):
-   glViewport(0, 0, width, height);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluPerspective(65.0, width / float(height), 1, 1000 );
-   glMatrixMode(GL_MODELVIEW);
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(65.0, width / float(height), 1, 1000 );
+    glMatrixMode(GL_MODELVIEW);
 
 POINTS = None
 COLORS = None
@@ -179,7 +176,9 @@ def display( ):
 
     glutSwapBuffers()
 
-mouseDrag=mouseDragX=mouseDragY=0
+mouseDrag=mouseDragX=mouseDragY=eyeX=eyeY=eyeZ=upX=upY=upZ=cam_phi=0
+cam_theta=90
+cam_r=100
 def onMousePress(button, state, x, y):
     global mouseDrag,mouseDragX,mouseDragY
     if button == GLUT_LEFT_BUTTON:
@@ -189,10 +188,6 @@ def onMousePress(button, state, x, y):
         mouseDragY = y
         return
     
-eyeX=eyeY=eyeZ=upX=upY=upZ=0
-cam_phi=0
-cam_theta=90
-cam_r=100
 def onMouseMove(x, y):
     global mouseDrag,mouseDragX,mouseDragY
     global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
@@ -216,8 +211,23 @@ def onMouseMove(x, y):
     upX = newValues[3]
     upY = newValues[4]
     upZ = newValues[5]
-    
     glutPostRedisplay()
+    
+def onKeyPress(key, x, y):
+    global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
+    if key == chr(27):
+        sys.exit()
+    if key == 'z':
+        cam_r -= 10
+    if key == 'Z':
+        cam_r += 10
+    newValues = lookInSphere(cam_r,cam_phi,cam_theta)
+    eyeX = newValues[0]
+    eyeY = newValues[1]
+    eyeZ = newValues[2]
+    upX = newValues[3]
+    upY = newValues[4]
+    upZ = newValues[5]
     
 def onKeySpecialPress(key, x, y):
     global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
@@ -253,6 +263,7 @@ def init():
     glutDisplayFunc( display )
     glutMouseFunc( onMousePress )
     glutMotionFunc( onMouseMove )
+    glutKeyboardFunc( onKeyPress )
     glutSpecialFunc( onKeySpecialPress )
     glutIdleFunc( my_idle )
     glEnable( GL_DEPTH_TEST )
@@ -283,5 +294,5 @@ def init():
     upY = newValues[4]
     upZ = newValues[5]
     glutMainLoop();
-
+    
 init()
