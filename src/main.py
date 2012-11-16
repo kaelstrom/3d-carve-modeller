@@ -13,11 +13,8 @@ GL_GEOMETRY_SHADER_EXT       = 0x8DD9
 GL_GEOMETRY_INPUT_TYPE_EXT   = 0x8DDB
 GL_GEOMETRY_OUTPUT_TYPE_EXT  = 0x8DDC
 GL_GEOMETRY_VERTICES_OUT_EXT = 0x8DDA
-cam_r=150
-cam_theta=270
-cam_phi=180
 
-# Define the missing glProgramParameteri method
+#Define the missing glProgramParameteri method
 _glProgramParameteri = None
 def glProgramParameteri( program, pname, value  ):
     global _glProgramParameteri
@@ -122,7 +119,7 @@ def define_shader():
     glProgramParameteri(shader_program, GL_GEOMETRY_INPUT_TYPE_EXT, gl.GL_POINTS )
     glProgramParameteri(shader_program, GL_GEOMETRY_OUTPUT_TYPE_EXT, gl.GL_TRIANGLE_STRIP )
     glProgramParameteri(shader_program, GL_GEOMETRY_VERTICES_OUT_EXT, 4 )
-
+    
     vobj = glCreateShaderObject( GL_VERTEX_SHADER )
     glShaderSource( vobj, vert )
     glCompileShader( vobj )
@@ -156,39 +153,53 @@ POINTS = None
 COLORS = None
 STATE  = None
 def display( ):   
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )  
-   glLoadIdentity()   
-   #gluLookAt( 100.0,100.0,100.0,
-   #           0.0,0.0,0.0,
-   #           0.0,0.0,1.0 )
-   
-   gluLookAt(eyeX, eyeY, eyeZ, 0, 0, 0, upX, upY, upZ);
-   
-   #glRotate( theta*15.0, 0.0,0.0,1.0 )
-   #glTranslatef( 25.0,25.0,0 )
-   
-   #glEnable( GL_BLEND )
-   glBlendFunc( GL_SRC_ALPHA, GL_ONE )
-   glUseProgram( shader_program )
-   glEnableClientState( GL_COLOR_ARRAY )
-   glEnableClientState( GL_VERTEX_ARRAY )
-   glColorPointer( 3,GL_FLOAT,0,COLORS )
-   glVertexPointer(3,GL_FLOAT,0,POINTS )
-   glDrawArrays( 0,0, len( POINTS ) )
-  
-   glutSwapBuffers()
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )  
+    glLoadIdentity()   
+    #gluLookAt( 100.0,100.0,100.0,
+    #           0.0,0.0,0.0,
+    #           0.0,0.0,1.0 )
 
+    gluLookAt(eyeX, eyeY, eyeZ, 0, 0, 0, upX, upY, upZ);
 
-eyeX=eyeY=eyeZ=upX=upY=upZ=0
-def onMouseMove(x, y):
-    global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
-    # Mouse point to angle conversion
+    #glRotate( theta*15.0, 0.0,0.0,1.0 )
+    #glTranslatef( 25.0,25.0,0 )
+
+    #glEnable( GL_BLEND )
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE )
+    glUseProgram( shader_program )
+    glEnableClientState( GL_COLOR_ARRAY )
+    glEnableClientState( GL_VERTEX_ARRAY )
+    glColorPointer( 3,GL_FLOAT,0,COLORS )
+    glVertexPointer(3,GL_FLOAT,0,POINTS )
+    glDrawArrays( 0,0, len( POINTS ) )
+
+    glutSwapBuffers()
+
+mouseDrag=mouseDragX=mouseDragY=0
+def onMousePress(button, state, x, y):
+    global mouseDrag,mouseDragX,mouseDragY
+    if button == GLUT_LEFT_BUTTON:
+        mouseDrag = (state == GLUT_DOWN)
+    if mouseDrag:
+        mouseDragX = x
+        mouseDragY = y
+        return
     
+eyeX=eyeY=eyeZ=upX=upY=upZ=0
+cam_phi=0
+cam_theta=90
+cam_r=150
+def onMouseMove(x, y):
+    global mouseDrag,mouseDragX,mouseDragY
+    global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
+    if not mouseDrag: return
+    #Mouse point to angle conversion
     #cam_theta = (360.0/winHeight)*y*3.0#3.0 rotations possible
     #cam_phi = (360.0/winWidth)*x*3.0
-    cam_phi = 360.0*(x-winWidth/2)/winWidth*2.0
-    cam_theta = 360.0*(y-winHeight/2)/winHeight*2.0 + 90.0
-    
+    cam_phi += 360.0*(mouseDragX - x)/winWidth*2.0
+    cam_theta += 360.0*(mouseDragY - y)/winHeight*2.0
+    mouseDragX = x
+    mouseDragY = y
     # Restrict the angles within 0~360 deg (optional)
     if cam_theta > 360:
         cam_theta = fmod(cam_theta,360.0)
@@ -226,6 +237,7 @@ def init():
     
     glutReshapeFunc( reshape )
     glutDisplayFunc( display )
+    glutMouseFunc( onMousePress )
     glutMotionFunc( onMouseMove )
     glutIdleFunc( my_idle )
     glEnable( GL_DEPTH_TEST )
@@ -244,11 +256,13 @@ def init():
         for j in range(cube_length):
             for k in range(cube_length):
                 #POINTS[i*cube_length**2+j*cube_length+k] = [i+i*j,j+j*k,k+k*i]
-                POINTS[i*cube_length**2+j*cube_length+k] = [i-cube_length/2,j-cube_length/2,k-cube_length/2]
+                POINTS[i*cube_length**2+j*cube_length+k] = [i+0.5-cube_length/2,j+0.5-cube_length/2,k+0.5-cube_length/2]
                 COLORS[i*cube_length**2+j*cube_length+k] = [i*1.0/cube_length,j*1.0/cube_length,k*1.0/cube_length]
-    
-    onMouseMove(winWidth/2,winHeight/2)
-    
+                
+    global mouseDrag
+    mouseDrag = 1
+    onMouseMove(0,0)
+    mouseDrag = 0
     glutMainLoop();
 
 init()
