@@ -186,16 +186,19 @@ def display( ):
 mouseDrag=mouseDragX=mouseDragY=eyeX=eyeY=eyeZ=upX=upY=upZ=cam_phi=0
 cam_theta=90
 cam_r=100
-def onMousePress(button, state, x, y):
-    global mouseDrag,mouseDragX,mouseDragY,tool
+mouseDragMove=False
+def onMousePress(button, state, x, y):    
+    global mouseDrag,mouseDragX,mouseDragY,tool,mouseDragMove
     if button == GLUT_LEFT_BUTTON:
         mouseDrag = (state == GLUT_DOWN)
     if mouseDrag:
         mouseDragX = x
         mouseDragY = y
         return
-    i,j,k = pointSelector(x,y)
-    tool.onMousePress(i,j,k)
+    if not mouseDragMove:
+        i,j,k = pointSelector(x,y)
+        tool.onMousePress(i,j,k)
+    mouseDragMove = False
     
 def pointSelector(x, y):
     viewport = glGetIntegerv(GL_VIEWPORT)
@@ -211,9 +214,10 @@ def pointSelector(x, y):
     return i,j,k
     
 def onMouseMove(x, y):
-    global mouseDrag,mouseDragX,mouseDragY
+    global mouseDrag,mouseDragX,mouseDragY,mouseDragMove
     global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
     if not mouseDrag: return
+    mouseDragMove = True
     #Mouse point to angle conversion
     #cam_theta = (360.0/winHeight)*y*3.0#3.0 rotations possible
     #cam_phi = (360.0/winWidth)*x*3.0
