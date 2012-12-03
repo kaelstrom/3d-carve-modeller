@@ -206,9 +206,9 @@ def pointSelector(x, y):
     color = pixel[0][0]
     print "clicked on color " + str(list(color))
     
-    i = int(color[0]*cube_length) 
-    j = int(color[1]*cube_length) 
-    k = int(color[2]*cube_length) 
+    i = int(color[0]*cube_length)
+    j = int(color[1]*cube_length)
+    k = int(color[2]*cube_length)
     
     print "located point " + str(i) + " " + str(j) + " " + str(k)
     return i,j,k
