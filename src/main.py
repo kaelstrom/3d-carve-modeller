@@ -327,7 +327,8 @@ def init():
     tool_functions.cube_length = cube_length
     
     global tool
-    tool = tool_functions.CubeTool()
+    tool = tool_functions.CubeTool(3)
+    #tool = tool_functions.PlaneTool(cube_length*0.5)
     
     glutMainLoop();
     
