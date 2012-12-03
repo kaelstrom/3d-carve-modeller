@@ -240,9 +240,13 @@ def onMouseMove(x, y):
     glutPostRedisplay()
     
 def onKeyPress(key, x, y):
-    global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
+    global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r,tool
     if key == chr(27):
         sys.exit()
+    if key == '1':
+        tool = tool_functions.CubeTool(3)
+    if key == '2':
+        tool = tool_functions.PlaneTool(cube_length*0.5)
     if key == 'z':
         cam_r = max(0,cam_r-10)
     if key == 'Z':
