@@ -3,11 +3,13 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from OpenGL import GL as gl
 import sys, numpy, time, random, math
+import tool_functions
 from math import fmod, sin, cos
 from camera_functions import lookInSphere
 
 winWidth=1280
 winHeight=720
+tool = None
 
 #These three defines exist in OpenGL.GL, but does not correspond to those used here
 GL_GEOMETRY_SHADER_EXT       = 0x8DD9
@@ -60,12 +62,16 @@ void main(){
 
 geom = '''#version 120 
 #extension GL_EXT_geometry_shader4 : enable 
-const float radius = 0.5;
+const float radius = 0.7;
 varying out vec2 coord;
 
 void main() 
 {
     gl_FrontColor = gl_FrontColorIn[0];
+    
+    if(gl_FrontColorIn[0] == vec4(0,0,0,1)) {
+        return;
+    }
 
     coord = vec2( -1,-1 );
     gl_Position = (gl_PositionIn[0] + gl_ProjectionMatrix * vec4(-radius,-radius,0,0) );
@@ -90,8 +96,8 @@ void main(){
     if (color.a<0.0) discard;
 
     // A VERY FAKE "lighting" model
-    float d = dot( normalize(vec3(coord,1.0)), vec3( 0.19, 0.19, 0.96225 ) );
-    color.rgb *= d*d;
+    //float d = dot( normalize(vec3(coord,1.0)), vec3( 0.19, 0.19, 0.96225 ) );
+    //color.rgb *= d*d;
     // end "lighting"
     
     gl_FragColor = color;
@@ -154,7 +160,8 @@ POINTS = None
 COLORS = None
 STATE  = None
 def display( ):   
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )  
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT ) 
+    glDisable(GL_LIGHTING) 
     glLoadIdentity()   
     #gluLookAt( 100.0,100.0,100.0,
     #           0.0,0.0,0.0,
@@ -180,13 +187,28 @@ mouseDrag=mouseDragX=mouseDragY=eyeX=eyeY=eyeZ=upX=upY=upZ=cam_phi=0
 cam_theta=90
 cam_r=100
 def onMousePress(button, state, x, y):
-    global mouseDrag,mouseDragX,mouseDragY
+    global mouseDrag,mouseDragX,mouseDragY,tool
     if button == GLUT_LEFT_BUTTON:
         mouseDrag = (state == GLUT_DOWN)
     if mouseDrag:
         mouseDragX = x
         mouseDragY = y
         return
+    i,j,k = pointSelector(x,y)
+    tool.onMousePress(i,j,k)
+    
+def pointSelector(x, y):
+    viewport = glGetIntegerv(GL_VIEWPORT)
+    pixel = glReadPixels(x,viewport[3]-y,1,1,GL_RGB,GL_FLOAT)
+    color = pixel[0][0]
+    print "clicked on color " + str(list(color))
+    
+    i = int(color[0]*cube_length) 
+    j = int(color[1]*cube_length) 
+    k = int(color[2]*cube_length) 
+    
+    print "located point " + str(i) + " " + str(j) + " " + str(k)
+    return i,j,k
     
 def onMouseMove(x, y):
     global mouseDrag,mouseDragX,mouseDragY
@@ -286,6 +308,7 @@ def init():
                 COLORS[i*cube_length**2+j*cube_length+k] = [i*1.0/cube_length,j*1.0/cube_length,k*1.0/cube_length]
                 if i == 0 or j == 0 or k == 0 or i == cube_length-1 or j == cube_length-1 or k == cube_length-1:
                     STATE[i*cube_length**2+j*cube_length+k] = 1#set as external point, internal are 2, removed are 0
+        
                     
     global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r
     newValues = lookInSphere(cam_r,cam_phi,cam_theta)
@@ -295,6 +318,13 @@ def init():
     upX = newValues[3]
     upY = newValues[4]
     upZ = newValues[5]
+    tool_functions.COLORS = COLORS
+    tool_functions.POINTS = POINTS
+    tool_functions.cube_length = cube_length
+    
+    global tool
+    tool = tool_functions.CubeTool()
+    
     glutMainLoop();
     
 init()
