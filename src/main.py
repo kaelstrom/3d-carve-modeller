@@ -206,9 +206,9 @@ def pointSelector(x, y):
     color = pixel[0][0]
     print "clicked on color " + str(list(color))
     
-    i = int(color[0]*cube_length) 
-    j = int(color[1]*cube_length) 
-    k = int(color[2]*cube_length) 
+    i = int(color[0]*cube_length)
+    j = int(color[1]*cube_length)
+    k = int(color[2]*cube_length)
     
     print "located point " + str(i) + " " + str(j) + " " + str(k)
     return i,j,k
@@ -243,10 +243,26 @@ def onKeyPress(key, x, y):
     global eyeX,eyeY,eyeZ,upX,upY,upZ,cam_theta,cam_phi,cam_r,tool
     if key == chr(27):
         sys.exit()
-    if key == '1':
-        tool = tool_functions.CubeTool(3)
-    if key == '2':
+    if key == '0':
         tool = tool_functions.PlaneTool(cube_length*0.5)
+    if key == '1':
+        tool = tool_functions.CubeTool(1)
+    if key == '2':
+        tool = tool_functions.CubeTool(2)
+    if key == '3':
+        tool = tool_functions.CubeTool(3)
+    if key == '4':
+        tool = tool_functions.CubeTool(4)
+    if key == '5':
+        tool = tool_functions.CubeTool(5)
+    if key == '6':
+        tool = tool_functions.CubeTool(6)
+    if key == '7':
+        tool = tool_functions.CubeTool(7)
+    if key == '8':
+        tool = tool_functions.CubeTool(8)
+    if key == '9':
+        tool = tool_functions.CubeTool(9)
     if key == 'z':
         cam_r = max(0,cam_r-10)
     if key == 'Z':
@@ -332,7 +348,6 @@ def init():
     
     global tool
     tool = tool_functions.CubeTool(3)
-    #tool = tool_functions.PlaneTool(cube_length*0.5)
     
     glutMainLoop();
     

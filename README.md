@@ -2,3 +2,5 @@
 =================
 
 Carves planes through a 3D grid to make models. Graphics class term project.
+
+Uses (requires) Python and PyOpenGL.
